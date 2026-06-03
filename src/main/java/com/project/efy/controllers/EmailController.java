@@ -1,0 +1,82 @@
+package com.project.efy.controllers;
+
+import com.project.efy.dtos.EmailDto;
+import com.project.efy.model.Email;
+import com.project.efy.model.Usuario;
+import com.project.efy.repositories.EmailRepository;
+import com.project.efy.repositories.UsuarioRepository;
+import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+import java.util.Optional;
+
+@RestController
+@RequestMapping("/emails")
+public class EmailController {
+
+    @Autowired
+    EmailRepository repository;
+
+    @Autowired
+    UsuarioRepository usuarioRepository;
+
+    @GetMapping
+    public ResponseEntity getAll(){
+        List<Email> listEmails = repository.findAll();
+        return ResponseEntity.status(HttpStatus.OK).body(listEmails);
+    }
+
+    @PostMapping
+    public ResponseEntity save(@RequestBody EmailDto dto){
+        Integer usuarioId = dto.usuario().getId();
+
+        Optional<Usuario> usuario = usuarioRepository.findById(usuarioId);
+
+        if(usuario.isEmpty()){
+            return ResponseEntity
+                    .status(HttpStatus.NOT_FOUND)
+                    .body("Usuário não encontrado");
+        }
+
+        var email = new Email();
+        BeanUtils.copyProperties(dto, email);
+        email.setUsuario(usuario.get());
+        return ResponseEntity.status(HttpStatus.CREATED).body(repository.save(email));
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity getById(@PathVariable Integer id){
+        Optional email = repository.findById(id);
+        if(email.isEmpty()){
+            return ResponseEntity
+                    .status(HttpStatus.NOT_FOUND)
+                    .body("Email não encontrado");
+        }
+        return ResponseEntity.status(HttpStatus.OK).body(email.get());
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity update(@PathVariable Integer id, @RequestBody EmailDto dto){
+        Optional<Email> email = repository.findById(id);
+        if (email.isEmpty()){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Email não encontrado");
+        }
+        var emailModel = email.get();
+        BeanUtils.copyProperties(dto, emailModel);
+        return ResponseEntity.status(HttpStatus.OK).body(repository.save(emailModel));
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity delete(@PathVariable Integer id){
+        Optional<Email> email = repository.findById(id);
+        if (email.isEmpty()){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Email não encontrado");
+        }
+        repository.delete(email.get());
+        return ResponseEntity.status(HttpStatus.OK).body("Email Deletado");
+    }
+}
