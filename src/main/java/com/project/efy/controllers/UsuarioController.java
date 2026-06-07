@@ -10,6 +10,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -29,6 +30,7 @@ public class UsuarioController {
     public ResponseEntity save(@RequestBody UsuarioDto dto){
         var usuario = new Usuario();
         BeanUtils.copyProperties(dto, usuario);
+        usuario.setCreated_at(new Date());
         return ResponseEntity.status(HttpStatus.CREATED).body(repository.save(usuario));
     }
 

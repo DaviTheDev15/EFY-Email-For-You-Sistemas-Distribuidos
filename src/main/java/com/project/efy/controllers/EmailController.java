@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Date;
 
 @RestController
 @RequestMapping("/emails")
@@ -45,6 +46,10 @@ public class EmailController {
         var email = new Email();
         BeanUtils.copyProperties(dto, email);
         email.setUsuario(usuario.get());
+        Date agora = new Date();
+
+        email.setCreated_at(agora);
+        email.setSend_at(agora);
         return ResponseEntity.status(HttpStatus.CREATED).body(repository.save(email));
     }
 
@@ -78,5 +83,10 @@ public class EmailController {
         }
         repository.delete(email.get());
         return ResponseEntity.status(HttpStatus.OK).body("Email Deletado");
+    }
+
+    @GetMapping("/historico")
+    public ResponseEntity getHistorico(){
+        return ResponseEntity.ok(repository.findHistorico());
     }
 }
