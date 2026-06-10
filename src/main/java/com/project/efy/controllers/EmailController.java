@@ -5,6 +5,7 @@ import com.project.efy.model.Email;
 import com.project.efy.model.Usuario;
 import com.project.efy.repositories.EmailRepository;
 import com.project.efy.repositories.UsuarioRepository;
+import com.project.efy.service.QueueService;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -21,6 +22,9 @@ public class EmailController {
 
     @Autowired
     EmailRepository repository;
+
+    @Autowired
+    private QueueService queueService;
 
     @Autowired
     UsuarioRepository usuarioRepository;
@@ -49,8 +53,14 @@ public class EmailController {
         Date agora = new Date();
 
         email.setCreated_at(agora);
-        email.setSend_at(agora);
-        return ResponseEntity.status(HttpStatus.CREATED).body(repository.save(email));
+        email.setStatus("PENDING");
+        email.setSend_at(null);
+        Email savedEmail = repository.save(email);
+        queueService.sendMessage(
+                savedEmail.getId().toString()
+        );
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(repository.save(savedEmail));
     }
 
     @GetMapping("/{id}")
@@ -88,5 +98,27 @@ public class EmailController {
     @GetMapping("/historico")
     public ResponseEntity getHistorico(){
         return ResponseEntity.ok(repository.findHistorico());
+    }
+
+    @PutMapping("/{id}/status")
+    public ResponseEntity atualizarStatus(
+            @PathVariable Integer id,
+            @RequestBody EmailDto dto
+    ) {
+
+        Optional<Email> email = repository.findById(id);
+
+        if(email.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        Email emailModel = email.get();
+
+        emailModel.setStatus(dto.status());
+        emailModel.setError_message(dto.error_message());
+
+        repository.save(emailModel);
+
+        return ResponseEntity.ok().build();
     }
 }
