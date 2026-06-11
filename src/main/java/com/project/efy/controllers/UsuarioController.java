@@ -31,7 +31,8 @@ public class UsuarioController {
         var usuario = new Usuario();
         BeanUtils.copyProperties(dto, usuario);
         usuario.setCreated_at(new Date());
-        return ResponseEntity.status(HttpStatus.CREATED).body(repository.save(usuario));
+        repository.save(usuario);
+        return ResponseEntity.status(HttpStatus.CREATED).body("Usuário criado com sucesso.");
     }
 
     @GetMapping("/{id}")
@@ -47,20 +48,21 @@ public class UsuarioController {
     public ResponseEntity update(@PathVariable Integer id, @RequestBody UsuarioDto dto){
         Optional<Usuario> usuario = repository.findById(id);
         if (usuario.isEmpty()){
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Usuário não encontrado");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Usuário não encontrado.");
         }
         var usuarioModel = usuario.get();
         BeanUtils.copyProperties(dto, usuarioModel);
-        return ResponseEntity.status(HttpStatus.OK).body(repository.save(usuarioModel));
+        repository.save(usuarioModel);
+        return ResponseEntity.status(HttpStatus.OK).body("Usuário atualizado com sucesso.");
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity delete(@PathVariable Integer id){
         Optional<Usuario> usuario = repository.findById(id);
         if (usuario.isEmpty()){
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Usuário não encontrado");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Usuário não encontrado.");
         }
         repository.delete(usuario.get());
-        return ResponseEntity.status(HttpStatus.OK).body("Usuário Deletado");
+        return ResponseEntity.status(HttpStatus.OK).body("Usuário Deletado.");
     }
 }

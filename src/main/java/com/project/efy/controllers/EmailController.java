@@ -44,7 +44,7 @@ public class EmailController {
         if(usuario.isEmpty()){
             return ResponseEntity
                     .status(HttpStatus.NOT_FOUND)
-                    .body("Usuário não encontrado");
+                    .body("Usuário não encontrado.");
         }
 
         var email = new Email();
@@ -59,8 +59,8 @@ public class EmailController {
         queueService.sendMessage(
                 savedEmail.getId().toString()
         );
-
-        return ResponseEntity.status(HttpStatus.CREATED).body(repository.save(savedEmail));
+        repository.save(savedEmail);
+        return ResponseEntity.status(HttpStatus.CREATED).body("Mensagem de Email criada com sucesso.");
     }
 
     @GetMapping("/{id}")
@@ -69,7 +69,7 @@ public class EmailController {
         if(email.isEmpty()){
             return ResponseEntity
                     .status(HttpStatus.NOT_FOUND)
-                    .body("Email não encontrado");
+                    .body("Email não encontrado.");
         }
         return ResponseEntity.status(HttpStatus.OK).body(email.get());
     }
@@ -78,21 +78,22 @@ public class EmailController {
     public ResponseEntity update(@PathVariable Integer id, @RequestBody EmailDto dto){
         Optional<Email> email = repository.findById(id);
         if (email.isEmpty()){
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Email não encontrado");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Email não encontrado.");
         }
         var emailModel = email.get();
         BeanUtils.copyProperties(dto, emailModel);
-        return ResponseEntity.status(HttpStatus.OK).body(repository.save(emailModel));
+        repository.save(emailModel);
+        return ResponseEntity.status(HttpStatus.OK).body("Mensagem de Email atualizada com sucesso.");
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity delete(@PathVariable Integer id){
         Optional<Email> email = repository.findById(id);
         if (email.isEmpty()){
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Email não encontrado");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Email não encontrado.");
         }
         repository.delete(email.get());
-        return ResponseEntity.status(HttpStatus.OK).body("Email Deletado");
+        return ResponseEntity.status(HttpStatus.OK).body("Email Deletado.");
     }
 
     @GetMapping("/historico")
@@ -116,6 +117,10 @@ public class EmailController {
 
         emailModel.setStatus(dto.status());
         emailModel.setError_message(dto.error_message());
+
+        if ("ENVIADO".equals(dto.status())) {
+            emailModel.setSend_at(new Date());
+        }
 
         repository.save(emailModel);
 
