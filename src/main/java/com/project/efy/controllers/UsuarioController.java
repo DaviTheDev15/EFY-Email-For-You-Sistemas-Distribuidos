@@ -34,7 +34,19 @@ public class UsuarioController {
         repository.save(usuario);
         return ResponseEntity.status(HttpStatus.CREATED).body("Usuário criado com sucesso.");
     }
+    
+    @PostMapping("/login")
+    public ResponseEntity login(@RequestBody UsuarioDto dto){
+        Optional<Usuario> usuario = repository.findByEmail(dto.getEmail());
 
+        if(usuario.isEmpty()){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body("Usuário não encontrado");
+        }
+
+        return ResponseEntity.ok(usuario.get());
+    }
+    
     @GetMapping("/{id}")
     public ResponseEntity getById(@PathVariable Integer id){
         Optional usuario = repository.findById(id);
