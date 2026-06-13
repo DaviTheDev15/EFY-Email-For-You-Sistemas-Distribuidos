@@ -53,7 +53,7 @@ public class EmailController {
         Date agora = new Date();
 
         email.setCreated_at(agora);
-        email.setStatus("PENDING");
+        email.setStatus("PENDENTE");
         email.setSend_at(null);
         Email savedEmail = repository.save(email);
         queueService.sendMessage(
