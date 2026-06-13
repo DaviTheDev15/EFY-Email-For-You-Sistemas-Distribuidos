@@ -14,6 +14,7 @@ public interface EmailRepository extends JpaRepository<Email, Integer> {
                 e.assunto,
                 e.message,
                 u.name,
+                u.email,
                 e.destinatarios,
                 e.status,
                 e.created_at,
